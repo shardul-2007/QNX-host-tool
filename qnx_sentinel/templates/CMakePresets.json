@@ -1,0 +1,75 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "qnx-aarch64-debug",
+      "displayName": "QNX SDP 8.0 AArch64 (Debug)",
+      "description": "Cross-compile for 64-bit ARM target using QNX 8.0 qcc (Debug)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/qnx-aarch64-debug",
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "QNX",
+        "CMAKE_SYSTEM_PROCESSOR": "aarch64",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/qnx.toolchain.cmake",
+        "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "environment": {
+        "QNX_HOST": "$penv{QNX_HOST}",
+        "QNX_TARGET": "$penv{QNX_TARGET}"
+      }
+    },
+    {
+      "name": "qnx-aarch64-release",
+      "displayName": "QNX SDP 8.0 AArch64 (Release)",
+      "description": "Cross-compile for 64-bit ARM target using QNX 8.0 qcc (Release)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/qnx-aarch64-release",
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "QNX",
+        "CMAKE_SYSTEM_PROCESSOR": "aarch64",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/qnx.toolchain.cmake",
+        "CMAKE_BUILD_TYPE": "Release"
+      },
+      "environment": {
+        "QNX_HOST": "$penv{QNX_HOST}",
+        "QNX_TARGET": "$penv{QNX_TARGET}"
+      }
+    },
+    {
+      "name": "qnx-x86_64-debug",
+      "displayName": "QNX SDP 8.0 x86_64 (Debug)",
+      "description": "Cross-compile for x86_64 target / QEMU using QNX 8.0 qcc (Debug)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/qnx-x86_64-debug",
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "QNX",
+        "CMAKE_SYSTEM_PROCESSOR": "x86_64",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/qnx.toolchain.cmake",
+        "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "environment": {
+        "QNX_HOST": "$penv{QNX_HOST}",
+        "QNX_TARGET": "$penv{QNX_TARGET}"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "qnx-aarch64-debug",
+      "configurePreset": "qnx-aarch64-debug"
+    },
+    {
+      "name": "qnx-aarch64-release",
+      "configurePreset": "qnx-aarch64-release"
+    },
+    {
+      "name": "qnx-x86_64-debug",
+      "configurePreset": "qnx-x86_64-debug"
+    }
+  ]
+}

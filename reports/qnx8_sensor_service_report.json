@@ -1,0 +1,79 @@
+{
+  "project_name": "qnx8_sensor_service",
+  "project_path": "C:\\Users\\shard\\Downloads\\QNX host tool\\samples\\qnx8_sensor_service",
+  "timestamp": "2026-11-09T15:38:26.703243+00:00",
+  "score": 100.0,
+  "grade": "A",
+  "summary": {
+    "CRITICAL": 0,
+    "WARNING": 0,
+    "INFO": 0,
+    "BEST_PRACTICE": 0,
+    "TOTAL": 0
+  },
+  "sdk_status": {
+    "is_qnx_sdp_detected": false,
+    "sdp_version": null,
+    "qnx_host": null,
+    "qnx_target": null,
+    "qnx_configuration": null,
+    "qcc_path": null,
+    "qcc_version_raw": null,
+    "supported_targets": [],
+    "qemu_available": false,
+    "qemu_binary": null,
+    "mkqnximage_available": false,
+    "mkqnximage_path": null,
+    "env_script_suggested": "call C:\\qnx800\\qnxsdp-env.bat",
+    "diagnostic_notes": [
+      "QNX_HOST environment variable is not defined.",
+      "QNX_TARGET environment variable is not defined.",
+      "Compiler driver 'qcc' was not found in PATH or QNX_HOST/usr/bin.",
+      "QEMU emulator (qemu-system-aarch64/x86_64) not found in host PATH.",
+      "Utility 'mkqnximage' not found (required for automated QSTI QEMU targets).",
+      "To activate QNX SDP 8.0, run: call C:\\qnx800\\qnxsdp-env.bat"
+    ]
+  },
+  "project_structure": {
+    "root_path": "C:\\Users\\shard\\Downloads\\QNX host tool\\samples\\qnx8_sensor_service",
+    "project_name": "qnx8_sensor_service",
+    "build_systems": [
+      "CMake",
+      "QNX_Recursive_Make"
+    ],
+    "source_files": [
+      "src\\main.c",
+      "src\\sensor_mgr.c",
+      "tests\\test_sensor.c"
+    ],
+    "header_files": [
+      "src\\sensor_mgr.h"
+    ],
+    "build_files": [
+      "CMakeLists.txt",
+      "CMakePresets.json",
+      "common.mk",
+      "qnx.toolchain.cmake"
+    ],
+    "detected_configs": [
+      "Toolchain file: qnx.toolchain.cmake",
+      "CMake presets: CMakePresets.json",
+      "QNX recursive make architecture (common.mk)"
+    ],
+    "missing_configs": [],
+    "incompatible_dependencies": [],
+    "suspicious_platform_assumptions": [],
+    "metrics": {
+      "total_files": 8,
+      "c_files": 3,
+      "cpp_files": 0,
+      "header_files": 1,
+      "build_files": 4,
+      "lines_of_code": 165
+    }
+  },
+  "findings": [],
+  "recommendations": [
+    "Project conforms cleanly to verified QNX 8.0 POSIX and microkernel standards! Proceed to cross-compilation."
+  ]
+}

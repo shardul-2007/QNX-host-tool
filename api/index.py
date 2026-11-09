@@ -26,7 +26,8 @@ from qnx_sentinel.core.models import AnalysisReport
 
 def get_project_dir(proj_name: str) -> Path:
     samples_dir = ROOT_DIR / "samples"
-    if proj_name == "qnx8_sensor_service":
+    clean_name = proj_name.strip("/\\").split("/")[-1].split("\\")[-1]
+    if "qnx8_sensor_service" in clean_name:
         return samples_dir / "qnx8_sensor_service"
     return samples_dir / "legacy_linux_telematics"
 

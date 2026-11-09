@@ -1,7 +1,7 @@
 {
   "project_name": "legacy_linux_telematics",
   "project_path": "C:\\Users\\shard\\Downloads\\QNX host tool\\samples\\legacy_linux_telematics",
-  "timestamp": "2026-11-09T15:38:26.742427+00:00",
+  "timestamp": "2026-11-09T16:35:10.217732+00:00",
   "score": 0.0,
   "grade": "F",
   "summary": {
@@ -65,6 +65,10 @@
       "[src\\daemon.cpp] Assumes Linux procfs '/proc/self/exe' (QNX requires _cmdname or /proc/<pid>/as)",
       "[src\\telemetry.cpp] Assumes Linux sysfs path '/sys/...' (Not available on QNX Neutrino RTOS)"
     ],
+    "include_paths": [
+      "include"
+    ],
+    "unresolved_includes": [],
     "metrics": {
       "total_files": 6,
       "c_files": 2,

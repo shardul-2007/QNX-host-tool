@@ -17,6 +17,7 @@ from qnx_sentinel.core.models import (
 from qnx_sentinel.reporter.terminal_reporter import TerminalReporter
 from qnx_sentinel.reporter.json_reporter import JSONReporter
 from qnx_sentinel.reporter.markdown_reporter import MarkdownReporter
+from qnx_sentinel.reporter.html_reporter import HTMLReporter
 
 
 class TestReporters(unittest.TestCase):
@@ -66,6 +67,15 @@ class TestReporters(unittest.TestCase):
         rendered = TerminalReporter.render_report(self.report)
         self.assertIn("QNX SENTINEL", rendered)
         self.assertIn("mock_proj", rendered)
+
+    def test_html_reporter(self):
+        with TemporaryDirectory() as tmpdir:
+            out_file = Path(tmpdir) / "report.html"
+            HTMLReporter.save(self.report, out_file)
+            self.assertTrue(out_file.exists())
+            html = out_file.read_text(encoding="utf-8")
+            self.assertIn("QNX Sentinel", html)
+            self.assertIn("STATIC_EMBEDDED_REPORT", html)
 
 
 if __name__ == "__main__":

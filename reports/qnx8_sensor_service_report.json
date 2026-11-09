@@ -1,7 +1,7 @@
 {
   "project_name": "qnx8_sensor_service",
   "project_path": "C:\\Users\\shard\\Downloads\\QNX host tool\\samples\\qnx8_sensor_service",
-  "timestamp": "2026-11-09T15:38:26.703243+00:00",
+  "timestamp": "2026-11-09T16:35:10.141503+00:00",
   "score": 100.0,
   "grade": "A",
   "summary": {
@@ -63,6 +63,10 @@
     "missing_configs": [],
     "incompatible_dependencies": [],
     "suspicious_platform_assumptions": [],
+    "include_paths": [
+      "src"
+    ],
+    "unresolved_includes": [],
     "metrics": {
       "total_files": 8,
       "c_files": 3,

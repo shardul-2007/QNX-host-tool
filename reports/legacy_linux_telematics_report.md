@@ -1,6 +1,6 @@
 # QNX Sentinel — Analysis Report: `legacy_linux_telematics`
 
-> **Analysis Timestamp:** `2026-11-09T15:38:26.742427+00:00`  
+> **Analysis Timestamp:** `2026-11-09T16:35:10.217732+00:00`  
 > **Project Root:** `C:\Users\shard\Downloads\QNX host tool\samples\legacy_linux_telematics`  
 > **QNX 8.0 Readiness Index:** **`0.0/100`** (Grade: **`F`**)
 

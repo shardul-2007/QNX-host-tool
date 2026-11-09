@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QNX Sentinel — Developer Dashboard</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --card-border: #30363d;
+      --text-main: #c9d1d9;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --critical: #f85149;
+      --warning: #d29922;
+      --best: #39d353;
+      --info: #79c0ff;
+      --code-bg: #090d13;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+    header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--card-border);
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo-badge {
+      background: linear-gradient(135deg, #1f6feb, #238636);
+      color: #fff;
+      font-weight: bold;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+    .brand h1 { font-size: 18px; font-weight: 600; color: #f0f6fc; }
+    .brand span { font-size: 13px; color: var(--text-muted); }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .btn {
+      background: #21262d;
+      color: #c9d1d9;
+      border: 1px solid var(--card-border);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: #30363d; border-color: #8b949e; }
+    .btn-primary { background: #238636; color: #fff; border-color: #2ea043; }
+    .btn-primary:hover { background: #2ea043; }
+    .btn-danger { background: #da3633; color: #fff; border-color: #f85149; }
+    .container { max-width: 1280px; margin: 24px auto; padding: 0 24px; }
+    .grid-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .metric-card .title { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+    .metric-card .value { font-size: 28px; font-weight: 700; color: #f0f6fc; margin-top: 6px; }
+    .metric-card .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .score-circle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 16px;
+      position: absolute;
+      right: 16px;
+      top: 16px;
+    }
+    .grade-A { background: rgba(57, 211, 83, 0.15); color: #39d353; border: 2px solid #39d353; }
+    .grade-B { background: rgba(88, 166, 255, 0.15); color: #58a6ff; border: 2px solid #58a6ff; }
+    .grade-C { background: rgba(210, 153, 34, 0.15); color: #d29922; border: 2px solid #d29922; }
+    .grade-D, .grade-F { background: rgba(248, 81, 73, 0.15); color: #f85149; border: 2px solid #f85149; }
+
+    .tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--card-border); margin-bottom: 20px; }
+    .tab {
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      flex-grow: 1;
+      max-width: 400px;
+    }
+    .pill {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      border: 1px solid var(--card-border);
+      background: #21262d;
+      color: var(--text-muted);
+    }
+    .pill.active { background: #30363d; color: #fff; border-color: #8b949e; }
+
+    .finding-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .finding-header {
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid transparent;
+    }
+    .finding-header:hover { background: rgba(255,255,255,0.04); }
+    .finding-title-group { display: flex; align-items: center; gap: 12px; }
+    .sev-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .sev-CRITICAL { background: rgba(248, 81, 73, 0.2); color: #f85149; border: 1px solid #f85149; }
+    .sev-WARNING { background: rgba(210, 153, 34, 0.2); color: #d29922; border: 1px solid #d29922; }
+    .sev-BEST_PRACTICE { background: rgba(57, 211, 83, 0.2); color: #39d353; border: 1px solid #39d353; }
+    .sev-INFO { background: rgba(121, 192, 255, 0.2); color: #79c0ff; border: 1px solid #79c0ff; }
+
+    .finding-title { font-weight: 600; font-size: 14px; color: #f0f6fc; }
+    .finding-loc { font-size: 12px; color: var(--text-muted); font-family: monospace; }
+    .finding-body { padding: 18px 20px; border-top: 1px solid var(--card-border); display: block; }
+    .desc-text { font-size: 13px; color: #c9d1d9; margin-bottom: 12px; }
+    .code-box {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12px;
+      overflow-x: auto;
+      margin-bottom: 12px;
+    }
+    .code-box.remediation {
+      border-left: 3px solid #238636;
+      background: #0d161d;
+    }
+    .remed-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #3fb950;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .doc-link { color: var(--accent); text-decoration: none; font-size: 12px; }
+    .doc-link:hover { text-decoration: underline; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .console-out {
+      background: #090d13;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      max-height: 400px;
+      overflow-y: auto;
+      color: #8b949e;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo-badge">QNX 8.0</div>
+      <div>
+        <h1 id="proj-title">QNX Sentinel — Developer Dashboard</h1>
+        <span id="proj-sub">Intelligent Build, Test & Compatibility Analyzer</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn" onclick="fetchReport()">Refresh Audit</button>
+      <button class="btn btn-primary" onclick="triggerBuild()">Run QNX 8.0 Build</button>
+      <button class="btn" onclick="triggerTests()">Run Target Tests</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Top Metrics -->
+    <div class="grid-metrics">
+      <div class="metric-card">
+        <span class="title">QNX 8.0 READINESS INDEX</span>
+        <span class="value" id="val-score">--</span>
+        <span class="sub" id="val-grade">Calculating...</span>
+        <div class="score-circle" id="circle-grade">--</div>
+      </div>
+      <div class="metric-card">
+        <span class="title">CRITICAL BLOCKERS</span>
+        <span class="value" style="color: #f85149;" id="val-critical">0</span>
+        <span class="sub">Must fix before linking</span>
+      </div>
+      <div class="metric-card">
+        <span class="title">PORTABILITY WARNINGS</span>
+        <span class="value" style="color: #d29922;" id="val-warning">0</span>
+        <span class="sub">POSIX / GNU glibc assumptions</span>
+      </div>
+      <div class="metric-card">
+        <span class="title">CODEBASE VOLUME</span>
+        <span class="value" id="val-files">0</span>
+        <span class="sub" id="val-loc">0 LOC analyzed</span>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('tab-findings', this)">Compatibility Findings (<span id="count-all">0</span>)</div>
+      <div class="tab" onclick="switchTab('tab-build', this)">Build Assistant & Toolchain</div>
+      <div class="tab" onclick="switchTab('tab-test', this)">Test Verification Assistant</div>
+      <div class="tab" onclick="switchTab('tab-sdk', this)">SDK & Host Environment</div>
+    </div>
+
+    <!-- Tab 1: Findings -->
+    <div id="tab-findings" class="panel active">
+      <div class="filter-bar">
+        <input type="text" id="search-box" class="search-input" placeholder="Filter by rule ID, file, or keyword..." oninput="filterFindings()">
+        <span class="pill active" onclick="setSeverityFilter('ALL', this)">All</span>
+        <span class="pill" onclick="setSeverityFilter('CRITICAL', this)">Critical (<span id="pill-crit">0</span>)</span>
+        <span class="pill" onclick="setSeverityFilter('WARNING', this)">Warning (<span id="pill-warn">0</span>)</span>
+        <span class="pill" onclick="setSeverityFilter('BEST_PRACTICE', this)">Best Practice</span>
+      </div>
+      <div id="findings-container"></div>
+    </div>
+
+    <!-- Tab 2: Build Assistant -->
+    <div id="tab-build" class="panel">
+      <div class="metric-card" style="margin-bottom: 20px;">
+        <span class="title">BUILD CONFIGURATION ADAPTATION</span>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">
+          QNX Sentinel generates verified <code>qnx.toolchain.cmake</code> and <code>CMakePresets.json</code> configurations for QNX SDP 8.0.
+        </p>
+        <div style="margin-top: 14px; display: flex; gap: 10px;">
+          <button class="btn btn-primary" onclick="applyBuildConfigs()">Apply Verified Toolchain to Project</button>
+          <button class="btn" onclick="triggerBuild()">Run Build Simulation</button>
+        </div>
+      </div>
+      <div class="console-out" id="build-console">Click "Run QNX 8.0 Build" or "Run Build Simulation" to execute the build workflow...</div>
+    </div>
+
+    <!-- Tab 3: Test Verification -->
+    <div id="tab-test" class="panel">
+      <div class="metric-card" style="margin-bottom: 20px;">
+        <span class="title">TARGET EXECUTION & SIMULATION ASSISTANT</span>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">
+          Executes test suites across detected QNX execution targets: Hardware targets via SSH, QEMU virtual targets via <code>mkqnximage</code>, or verified host-simulated target test harnesses.
+        </p>
+        <div style="margin-top: 14px; display: flex; gap: 10px;">
+          <button class="btn btn-primary" onclick="triggerTests()">Run Test Suite</button>
+        </div>
+      </div>
+      <div class="console-out" id="test-console">Click "Run Test Suite" to execute test verification...</div>
+    </div>
+
+    <!-- Tab 4: SDK Environment -->
+    <div id="tab-sdk" class="panel">
+      <div class="metric-card">
+        <span class="title">HOST QNX SDP 8.0 STATUS</span>
+        <div id="sdk-details" style="font-size: 13px; margin-top: 10px; line-height: 1.8;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let reportData = null;
+    let activeSevFilter = 'ALL';
+
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    function setSeverityFilter(sev, el) {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      activeSevFilter = sev;
+      filterFindings();
+    }
+
+    async function fetchReport() {
+      try {
+        const res = await fetch('/api/report');
+        reportData = await res.json();
+        renderDashboard(reportData);
+      } catch (e) {
+        console.error("Failed to load report", e);
+      }
+    }
+
+    function renderDashboard(data) {
+      document.getElementById('proj-title').innerText = `QNX Sentinel — ${data.project_name}`;
+      document.getElementById('val-score').innerText = `${data.score}/100`;
+      document.getElementById('val-grade').innerText = `Compliance Grade: ${data.grade}`;
+      
+      const circle = document.getElementById('circle-grade');
+      circle.className = `score-circle grade-${data.grade}`;
+      circle.innerText = data.grade;
+
+      document.getElementById('val-critical').innerText = data.summary.CRITICAL || 0;
+      document.getElementById('val-warning').innerText = data.summary.WARNING || 0;
+      document.getElementById('pill-crit').innerText = data.summary.CRITICAL || 0;
+      document.getElementById('pill-warn').innerText = data.summary.WARNING || 0;
+      document.getElementById('count-all').innerText = data.findings.length;
+
+      const m = data.project_structure.metrics;
+      document.getElementById('val-files').innerText = `${m.total_files} files`;
+      document.getElementById('val-loc').innerText = `${m.lines_of_code.toLocaleString()} LOC`;
+
+      // Render SDK
+      const sdk = data.sdk_status;
+      let sdkHtml = `<div><strong>SDP Detected:</strong> ${sdk.is_qnx_sdp_detected ? 'YES (' + (sdk.sdp_version || '8.0') + ')' : 'NO (Running in Host-Static Analysis Mode)'}</div>`;
+      if (sdk.qnx_host) sdkHtml += `<div><strong>QNX_HOST:</strong> <code>${sdk.qnx_host}</code></div>`;
+      if (sdk.qnx_target) sdkHtml += `<div><strong>QNX_TARGET:</strong> <code>${sdk.qnx_target}</code></div>`;
+      if (sdk.qcc_path) sdkHtml += `<div><strong>Compiler:</strong> <code>${sdk.qcc_path}</code></div>`;
+      if (sdk.env_script_suggested) sdkHtml += `<div style="color: #d29922; margin-top: 6px;"><strong>To activate real SDP:</strong> <code>${sdk.env_script_suggested}</code></div>`;
+      document.getElementById('sdk-details').innerHTML = sdkHtml;
+
+      filterFindings();
+    }
+
+    function filterFindings() {
+      if (!reportData) return;
+      const term = (document.getElementById('search-box').value || '').toLowerCase();
+      const container = document.getElementById('findings-container');
+      container.innerHTML = '';
+
+      const filtered = reportData.findings.filter(f => {
+        if (activeSevFilter !== 'ALL' && f.severity !== activeSevFilter) return false;
+        if (term) {
+          const match = f.title.toLowerCase().includes(term) ||
+                        f.file_path.toLowerCase().includes(term) ||
+                        f.rule_id.toLowerCase().includes(term) ||
+                        f.description.toLowerCase().includes(term);
+          if (!match) return false;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div style="padding: 30px; text-align: center; color: var(--text-muted);">No findings match the current filter.</div>`;
+        return;
+      }
+
+      filtered.forEach((f, idx) => {
+        const card = document.createElement('div');
+        card.className = 'finding-card';
+        card.innerHTML = `
+          <div class="finding-header">
+            <div class="finding-title-group">
+              <span class="sev-tag sev-${f.severity}">${f.severity}</span>
+              <span class="finding-title">${f.title}</span>
+              <span style="font-size: 11px; color: var(--text-muted);">[${f.rule_id}]</span>
+            </div>
+            <span class="finding-loc">${f.file_path}:${f.line_number}</span>
+          </div>
+          <div class="finding-body">
+            <p class="desc-text">${f.description}</p>
+            ${f.code_snippet ? `<div class="code-box">${escapeHtml(f.code_snippet)}</div>` : ''}
+            <div class="remed-label">
+              <span>Remediation Guidance:</span>
+              ${f.documentation_url ? `<a class="doc-link" href="${f.documentation_url}" target="_blank">Official QNX Docs ↗</a>` : ''}
+            </div>
+            <p class="desc-text" style="color: #39d353;">${f.remediation}</p>
+            ${f.remediation_code ? `<div class="code-box remediation">${escapeHtml(f.remediation_code)}</div>` : ''}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function triggerBuild() {
+      const consoleBox = document.getElementById('build-console');
+      consoleBox.innerText = "Executing QNX 8.0 build / simulation workflow...";
+      switchTab('tab-build', document.querySelectorAll('.tab')[1]);
+      try {
+        const res = await fetch('/api/build', { method: 'POST' });
+        const data = await res.json();
+        consoleBox.innerText = `[Execution Mode: ${data.execution_mode}]\nDuration: ${data.duration_seconds}s | Exit Code: ${data.exit_code}\n\n${data.stdout}\n${data.stderr}`;
+      } catch (e) {
+        consoleBox.innerText = "Build invocation error: " + e;
+      }
+    }
+
+    async function triggerTests() {
+      const consoleBox = document.getElementById('test-console');
+      consoleBox.innerText = "Executing target tests...";
+      switchTab('tab-test', document.querySelectorAll('.tab')[2]);
+      try {
+        const res = await fetch('/api/test', { method: 'POST' });
+        const data = await res.json();
+        let out = `${data.raw_output}\nSuite: ${data.suite_name} (Mode: ${data.execution_mode})\nTotal: ${data.total_tests} | Passed: ${data.passed} | Failed: ${data.failed}\n\n`;
+        data.tests.forEach(t => {
+          out += `[${t.status}] ${t.name} (${t.duration_ms}ms)\n${t.stdout ? '  ' + t.stdout + '\n' : ''}${t.stderr ? '  ERR: ' + t.stderr + '\n' : ''}`;
+        });
+        consoleBox.innerText = out;
+      } catch (e) {
+        consoleBox.innerText = "Test execution error: " + e;
+      }
+    }
+
+    async function applyBuildConfigs() {
+      if (!confirm("Generate and apply verified qnx.toolchain.cmake and CMakePresets.json to project directory?")) return;
+      try {
+        const res = await fetch('/api/apply-config', { method: 'POST' });
+        const data = await res.json();
+        alert("Applied: \n" + data.applied.join("\n"));
+        fetchReport();
+      } catch (e) {
+        alert("Failed to apply: " + e);
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // Auto load on init
+    
+  </script>
+
+        <script>
+          // Injected static report data for offline viewing
+          const STATIC_EMBEDDED_REPORT = {
+  "project_name": "qnx8_sensor_service",
+  "project_path": "C:\\Users\\shard\\Downloads\\QNX host tool\\samples\\qnx8_sensor_service",
+  "timestamp": "2026-11-09T16:35:10.141503+00:00",
+  "score": 100.0,
+  "grade": "A",
+  "summary": {
+    "CRITICAL": 0,
+    "WARNING": 0,
+    "INFO": 0,
+    "BEST_PRACTICE": 0,
+    "TOTAL": 0
+  },
+  "sdk_status": {
+    "is_qnx_sdp_detected": false,
+    "sdp_version": null,
+    "qnx_host": null,
+    "qnx_target": null,
+    "qnx_configuration": null,
+    "qcc_path": null,
+    "qcc_version_raw": null,
+    "supported_targets": [],
+    "qemu_available": false,
+    "qemu_binary": null,
+    "mkqnximage_available": false,
+    "mkqnximage_path": null,
+    "env_script_suggested": "call C:\\qnx800\\qnxsdp-env.bat",
+    "diagnostic_notes": [
+      "QNX_HOST environment variable is not defined.",
+      "QNX_TARGET environment variable is not defined.",
+      "Compiler driver 'qcc' was not found in PATH or QNX_HOST/usr/bin.",
+      "QEMU emulator (qemu-system-aarch64/x86_64) not found in host PATH.",
+      "Utility 'mkqnximage' not found (required for automated QSTI QEMU targets).",
+      "To activate QNX SDP 8.0, run: call C:\\qnx800\\qnxsdp-env.bat"
+    ]
+  },
+  "project_structure": {
+    "root_path": "C:\\Users\\shard\\Downloads\\QNX host tool\\samples\\qnx8_sensor_service",
+    "project_name": "qnx8_sensor_service",
+    "build_systems": [
+      "CMake",
+      "QNX_Recursive_Make"
+    ],
+    "source_files": [
+      "src\\main.c",
+      "src\\sensor_mgr.c",
+      "tests\\test_sensor.c"
+    ],
+    "header_files": [
+      "src\\sensor_mgr.h"
+    ],
+    "build_files": [
+      "CMakeLists.txt",
+      "CMakePresets.json",
+      "common.mk",
+      "qnx.toolchain.cmake"
+    ],
+    "detected_configs": [
+      "Toolchain file: qnx.toolchain.cmake",
+      "CMake presets: CMakePresets.json",
+      "QNX recursive make architecture (common.mk)"
+    ],
+    "missing_configs": [],
+    "incompatible_dependencies": [],
+    "suspicious_platform_assumptions": [],
+    "include_paths": [
+      "src"
+    ],
+    "unresolved_includes": [],
+    "metrics": {
+      "total_files": 8,
+      "c_files": 3,
+      "cpp_files": 0,
+      "header_files": 1,
+      "build_files": 4,
+      "lines_of_code": 165
+    }
+  },
+  "findings": [],
+  "recommendations": [
+    "Project conforms cleanly to verified QNX 8.0 POSIX and microkernel standards! Proceed to cross-compilation."
+  ]
+};
+          window.onload = function() {
+            reportData = STATIC_EMBEDDED_REPORT;
+            renderDashboard(reportData);
+          };
+        </script>
+        </body>
+        
+</html>

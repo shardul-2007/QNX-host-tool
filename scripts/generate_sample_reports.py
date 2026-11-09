@@ -14,6 +14,7 @@ from qnx_sentinel.analyzer.project_analyzer import ProjectAnalyzer
 from qnx_sentinel.analyzer.compatibility_engine import CompatibilityEngine
 from qnx_sentinel.reporter.json_reporter import JSONReporter
 from qnx_sentinel.reporter.markdown_reporter import MarkdownReporter
+from qnx_sentinel.reporter.html_reporter import HTMLReporter
 from qnx_sentinel.core.models import AnalysisReport
 
 def generate_for_project(proj_path: Path, out_dir: Path):
@@ -40,9 +41,11 @@ def generate_for_project(proj_path: Path, out_dir: Path):
     out_dir.mkdir(parents=True, exist_ok=True)
     json_path = JSONReporter.save(report, out_dir / f"{struct.project_name}_report.json")
     md_path = MarkdownReporter.save(report, out_dir / f"{struct.project_name}_report.md")
+    html_path = HTMLReporter.save(report, out_dir / f"{struct.project_name}_report.html")
 
     print(f"[+] Generated: {json_path}")
     print(f"[+] Generated: {md_path}")
+    print(f"[+] Generated: {html_path}")
     print(f"    Score: {report.score}/100 [{report.grade}] | Total findings: {len(report.findings)}")
 
 def main():

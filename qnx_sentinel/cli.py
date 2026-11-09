@@ -19,6 +19,7 @@ from qnx_sentinel.diagnostics.error_explainer import ErrorExplainer
 from qnx_sentinel.reporter.terminal_reporter import TerminalReporter, Colors
 from qnx_sentinel.reporter.json_reporter import JSONReporter
 from qnx_sentinel.reporter.markdown_reporter import MarkdownReporter
+from qnx_sentinel.reporter.html_reporter import HTMLReporter
 from qnx_sentinel.reporter.web_dashboard import start_server
 from qnx_sentinel.core.models import AnalysisReport
 
@@ -92,7 +93,7 @@ def cmd_analyze(args: argparse.Namespace) -> int:
     if fmt in ("terminal", "all"):
         print(TerminalReporter.render_report(report))
 
-    if output_dir or fmt in ("json", "markdown", "all"):
+    if output_dir or fmt in ("json", "markdown", "html", "all"):
         out_base = Path(output_dir) if output_dir else proj_path / "qnx_sentinel_reports"
         out_base.mkdir(parents=True, exist_ok=True)
 
@@ -103,6 +104,10 @@ def cmd_analyze(args: argparse.Namespace) -> int:
         if fmt in ("markdown", "all"):
             md_file = MarkdownReporter.save(report, out_base / "qnx_analysis_report.md")
             print(f"[+] Saved Markdown Report: {md_file}")
+
+        if fmt in ("html", "all"):
+            html_file = HTMLReporter.save(report, out_base / "qnx_analysis_report.html")
+            print(f"[+] Saved Standalone HTML Report: {html_file}")
 
     # Check fail-under threshold
     fail_under = getattr(args, "fail_under", None)
@@ -336,7 +341,7 @@ def build_parser() -> argparse.ArgumentParser:
     # analyze
     p_analyze = subparsers.add_parser("analyze", help="Analyze C/C++ project for QNX 8.0 compatibility")
     p_analyze.add_argument("project_path", nargs="?", default=".", help="Path to project directory")
-    p_analyze.add_argument("--format", choices=["terminal", "json", "markdown", "all"], default="terminal", help="Output format")
+    p_analyze.add_argument("--format", choices=["terminal", "json", "markdown", "html", "all"], default="terminal", help="Output format")
     p_analyze.add_argument("--output-dir", help="Directory to save generated reports")
     p_analyze.add_argument("--fail-under", type=float, help="Fail if readiness score is below threshold")
 

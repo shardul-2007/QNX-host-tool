@@ -37,6 +37,8 @@ CMakeCache.txt
 *.cmake.user
 *.ninja
 .ninja_*
+sentinel_output/
+qnx_sentinel_reports/
 
 # IDE
 .vscode/

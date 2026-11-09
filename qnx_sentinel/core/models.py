@@ -75,6 +75,8 @@ class ProjectStructure:
     missing_configs: List[str] = field(default_factory=list)
     incompatible_dependencies: List[str] = field(default_factory=list)
     suspicious_platform_assumptions: List[str] = field(default_factory=list)
+    include_paths: List[str] = field(default_factory=list)
+    unresolved_includes: List[str] = field(default_factory=list)
     metrics: ProjectMetrics = field(default_factory=ProjectMetrics)
 
     def to_dict(self) -> Dict[str, Any]:

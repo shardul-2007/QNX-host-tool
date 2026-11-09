@@ -97,6 +97,9 @@ class ProjectAnalyzer:
         # Inspect source files for platform assumptions
         self._inspect_platform_assumptions(structure)
 
+        # Inspect include paths and header references
+        self._inspect_include_paths(structure)
+
         return structure
 
     def _count_lines(self, path: Path) -> int:
@@ -211,3 +214,55 @@ class ProjectAnalyzer:
                 continue
 
         structure.suspicious_platform_assumptions = assumptions
+
+    def _inspect_include_paths(self, structure: ProjectStructure) -> None:
+        """Discovers include directories and validates local header references."""
+        inc_dirs: Set[str] = set()
+        unresolved: List[str] = []
+
+        # 1. Discover header directories from project layout
+        for h in structure.header_files:
+            h_dir = str(Path(h).parent)
+            inc_dirs.add("." if h_dir == "" else h_dir)
+
+        # 2. Extract include_directories from build files
+        inc_regex = re.compile(r"(?:include_directories|target_include_directories)\s*\([^)]*?([a-zA-Z0-9_\-\./]+)")
+        for bfile in structure.build_files:
+            full_path = self.root_path / bfile
+            try:
+                content = full_path.read_text(encoding="utf-8", errors="ignore")
+                for match in inc_regex.finditer(content):
+                    raw_dir = match.group(1).strip()
+                    if raw_dir and not raw_dir.startswith("$") and not raw_dir in ("PUBLIC", "PRIVATE", "INTERFACE"):
+                        inc_dirs.add(raw_dir)
+            except Exception:
+                continue
+
+        structure.include_paths = sorted(list(inc_dirs))
+
+        # 3. Check for invalid or missing local header includes (#include "...")
+        local_inc_pat = re.compile(r'#\s*include\s*"([^"]+)"')
+        all_sources = structure.source_files + structure.header_files
+        all_header_names = {Path(h).name for h in structure.header_files}
+
+        for sfile in all_sources:
+            full_sfile = self.root_path / sfile
+            try:
+                lines = full_sfile.read_text(encoding="utf-8", errors="ignore").splitlines()
+                for line_idx, line in enumerate(lines, start=1):
+                    m = local_inc_pat.search(line)
+                    if m:
+                        header_ref = m.group(1)
+                        # Check direct relative path
+                        direct_target = full_sfile.parent / header_ref
+                        # Check include dirs
+                        found_in_inc = any((self.root_path / idir / header_ref).is_file() for idir in inc_dirs)
+                        # Check header basename
+                        found_basename = Path(header_ref).name in all_header_names
+
+                        if not direct_target.is_file() and not found_in_inc and not found_basename:
+                            unresolved.append(f"[{sfile}:{line_idx}] Unresolved include: \"{header_ref}\"")
+            except Exception:
+                continue
+
+        structure.unresolved_includes = unresolved

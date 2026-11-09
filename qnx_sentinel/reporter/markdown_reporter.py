@@ -67,6 +67,14 @@ class MarkdownReporter:
             lines.append("> Use `qnx-sentinel build-assist` to automatically generate verified `qnx.toolchain.cmake` and `CMakePresets.json` templates.")
             lines.append("")
 
+        # Unresolved Include Paths
+        if report.project_structure.unresolved_includes:
+            lines.append("### Unresolved Include Paths & Missing Local Headers")
+            lines.append("")
+            for inc in report.project_structure.unresolved_includes:
+                lines.append(f"- ⚠️ `{inc}`")
+            lines.append("")
+
         # Detailed Findings Table
         lines.append("## 4. Portability & Compatibility Findings")
         lines.append("")

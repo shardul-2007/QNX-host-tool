@@ -94,6 +94,13 @@ class TerminalReporter:
             lines.append(f"  {Colors.DIM}(Use 'qnx-sentinel build-assist' to generate verified templates){Colors.RESET}")
             lines.append("")
 
+        # Unresolved Include Paths
+        if report.project_structure.unresolved_includes:
+            lines.append(f"{Colors.BOLD}{Colors.RED}--- [3b] UNRESOLVED INCLUDE PATHS ---{Colors.RESET}")
+            for inc in report.project_structure.unresolved_includes:
+                lines.append(f"  {Colors.RED}[!] {inc}{Colors.RESET}")
+            lines.append("")
+
         # Detailed Findings List
         if report.findings:
             lines.append(f"{Colors.BOLD}--- [4] DETAILED PORTABILITY FINDINGS ---{Colors.RESET}")

@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QNX Sentinel — Developer Dashboard (Live Cloud Edition)</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --card-border: #30363d;
+      --text-main: #c9d1d9;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --critical: #f85149;
+      --warning: #d29922;
+      --best: #39d353;
+      --info: #79c0ff;
+      --code-bg: #090d13;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+    header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--card-border);
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo-badge {
+      background: linear-gradient(135deg, #1f6feb, #238636);
+      color: #fff;
+      font-weight: bold;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+    .brand h1 { font-size: 18px; font-weight: 600; color: #f0f6fc; }
+    .brand span { font-size: 13px; color: var(--text-muted); }
+    .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .proj-select {
+      background: #21262d;
+      color: #f0f6fc;
+      border: 1px solid #58a6ff;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn {
+      background: #21262d;
+      color: #c9d1d9;
+      border: 1px solid var(--card-border);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: #30363d; border-color: #8b949e; }
+    .btn-primary { background: #238636; color: #fff; border-color: #2ea043; }
+    .btn-primary:hover { background: #2ea043; }
+    .btn-accent { background: #1f6feb; color: #fff; border-color: #388bfd; }
+    .btn-accent:hover { background: #388bfd; }
+
+    .container { max-width: 1280px; margin: 24px auto; padding: 0 24px; }
+    .grid-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .metric-card .title { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+    .metric-card .value { font-size: 28px; font-weight: 700; color: #f0f6fc; margin-top: 6px; }
+    .metric-card .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .score-circle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 18px;
+      position: absolute;
+      right: 16px;
+      top: 16px;
+    }
+    .grade-A { background: rgba(57, 211, 83, 0.15); color: #39d353; border: 2px solid #39d353; }
+    .grade-B { background: rgba(88, 166, 255, 0.15); color: #58a6ff; border: 2px solid #58a6ff; }
+    .grade-C { background: rgba(210, 153, 34, 0.15); color: #d29922; border: 2px solid #d29922; }
+    .grade-D, .grade-F { background: rgba(248, 81, 73, 0.15); color: #f85149; border: 2px solid #f85149; }
+
+    .tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--card-border); margin-bottom: 20px; overflow-x: auto; }
+    .tab {
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+    }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      flex-grow: 1;
+      max-width: 400px;
+    }
+    .pill {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      border: 1px solid var(--card-border);
+      background: #21262d;
+      color: var(--text-muted);
+    }
+    .pill.active { background: #30363d; color: #fff; border-color: #8b949e; }
+
+    .finding-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .finding-header {
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      background: rgba(255,255,255,0.02);
+    }
+    .finding-header:hover { background: rgba(255,255,255,0.04); }
+    .finding-title-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .sev-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .sev-CRITICAL { background: rgba(248, 81, 73, 0.2); color: #f85149; border: 1px solid #f85149; }
+    .sev-WARNING { background: rgba(210, 153, 34, 0.2); color: #d29922; border: 1px solid #d29922; }
+    .sev-BEST_PRACTICE { background: rgba(57, 211, 83, 0.2); color: #39d353; border: 1px solid #39d353; }
+    .sev-INFO { background: rgba(121, 192, 255, 0.2); color: #79c0ff; border: 1px solid #79c0ff; }
+
+    .finding-title { font-weight: 600; font-size: 14px; color: #f0f6fc; }
+    .finding-loc { font-size: 12px; color: var(--text-muted); font-family: monospace; }
+    .finding-body { padding: 18px 20px; border-top: 1px solid var(--card-border); display: block; }
+    .desc-text { font-size: 13px; color: #c9d1d9; margin-bottom: 12px; }
+    .code-box {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12px;
+      overflow-x: auto;
+      margin-bottom: 12px;
+      white-space: pre;
+    }
+    .code-box.remediation {
+      border-left: 3px solid #238636;
+      background: #0d161d;
+    }
+    .remed-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #3fb950;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .doc-link { color: var(--accent); text-decoration: none; font-size: 12px; }
+    .doc-link:hover { text-decoration: underline; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .console-out {
+      background: #090d13;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      max-height: 400px;
+      overflow-y: auto;
+      color: #8b949e;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo-badge">QNX 8.0</div>
+      <div>
+        <h1 id="proj-title">QNX Sentinel — Developer Dashboard</h1>
+        <span id="proj-sub">Intelligent Build, Test & Compatibility Analyzer</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <label for="project-select" style="font-size: 12px; color: var(--text-muted);">Switch Project:</label>
+      <select id="project-select" class="proj-select" onchange="onProjectChange(this.value)">
+        <option value="legacy_linux_telematics">Legacy Linux Telematics (Grade F - Porting Challenge)</option>
+        <option value="qnx8_sensor_service">Clean QNX 8.0 Sensor Service (Grade A - Verified)</option>
+      </select>
+      <button class="btn btn-primary" onclick="triggerBuild()">Run QNX 8.0 Build</button>
+      <button class="btn" onclick="triggerTests()">Run Target Tests</button>
+      <a class="btn btn-accent" href="https://github.com/shardul-2007/QNX-host-tool" target="_blank">GitHub Repo ↗</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Top Metrics -->
+    <div class="grid-metrics">
+      <div class="metric-card">
+        <span class="title">QNX 8.0 READINESS INDEX</span>
+        <span class="value" id="val-score">--</span>
+        <span class="sub" id="val-grade">Calculating...</span>
+        <div class="score-circle" id="circle-grade">--</div>
+      </div>
+      <div class="metric-card">
+        <span class="title">CRITICAL BLOCKERS</span>
+        <span class="value" style="color: #f85149;" id="val-critical">0</span>
+        <span class="sub">Must fix before linking</span>
+      </div>
+      <div class="metric-card">
+        <span class="title">PORTABILITY WARNINGS</span>
+        <span class="value" style="color: #d29922;" id="val-warning">0</span>
+        <span class="sub">POSIX / GNU glibc assumptions</span>
+      </div>
+      <div class="metric-card">
+        <span class="title">CODEBASE VOLUME</span>
+        <span class="value" id="val-files">0</span>
+        <span class="sub" id="val-loc">0 LOC analyzed</span>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('tab-findings', this)">Compatibility Findings (<span id="count-all">0</span>)</div>
+      <div class="tab" onclick="switchTab('tab-build', this)">Build Assistant & Toolchain</div>
+      <div class="tab" onclick="switchTab('tab-test', this)">Test Verification Assistant</div>
+      <div class="tab" onclick="switchTab('tab-diagnose', this)">Interactive Error Diagnoser</div>
+      <div class="tab" onclick="switchTab('tab-sdk', this)">SDK & Host Environment</div>
+    </div>
+
+    <!-- Tab 1: Findings -->
+    <div id="tab-findings" class="panel active">
+      <div class="filter-bar">
+        <input type="text" id="search-box" class="search-input" placeholder="Filter by rule ID, file, or keyword..." oninput="filterFindings()">
+        <span class="pill active" onclick="setSeverityFilter('ALL', this)">All</span>
+        <span class="pill" onclick="setSeverityFilter('CRITICAL', this)">Critical (<span id="pill-crit">0</span>)</span>
+        <span class="pill" onclick="setSeverityFilter('WARNING', this)">Warning (<span id="pill-warn">0</span>)</span>
+        <span class="pill" onclick="setSeverityFilter('BEST_PRACTICE', this)">Best Practice</span>
+      </div>
+      <div id="findings-container"></div>
+    </div>
+
+    <!-- Tab 2: Build Assistant -->
+    <div id="tab-build" class="panel">
+      <div class="metric-card" style="margin-bottom: 20px;">
+        <span class="title">BUILD CONFIGURATION ADAPTATION</span>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">
+          QNX Sentinel generates verified <code>qnx.toolchain.cmake</code> and <code>CMakePresets.json</code> configurations for QNX SDP 8.0 targeting 64-bit ARM (AArch64) and x86_64.
+        </p>
+        <div style="margin-top: 14px; display: flex; gap: 10px;">
+          <button class="btn btn-primary" onclick="applyBuildConfigs()">Apply Verified Toolchain</button>
+          <button class="btn" onclick="triggerBuild()">Run Build Simulation</button>
+        </div>
+      </div>
+      <div class="console-out" id="build-console">Click "Run QNX 8.0 Build" or "Run Build Simulation" to execute the build workflow...</div>
+    </div>
+
+    <!-- Tab 3: Test Verification -->
+    <div id="tab-test" class="panel">
+      <div class="metric-card" style="margin-bottom: 20px;">
+        <span class="title">TARGET EXECUTION & SIMULATION ASSISTANT</span>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">
+          Executes test suites across detected QNX execution targets: Hardware targets via SSH, QEMU virtual targets via <code>mkqnximage</code>, or verified host-simulated target test harnesses.
+        </p>
+        <div style="margin-top: 14px; display: flex; gap: 10px;">
+          <button class="btn btn-primary" onclick="triggerTests()">Run Target Test Suite</button>
+        </div>
+      </div>
+      <div class="console-out" id="test-console">Click "Run Target Test Suite" to execute test verification...</div>
+    </div>
+
+    <!-- Tab 4: Interactive Diagnoser -->
+    <div id="tab-diagnose" class="panel">
+      <div class="metric-card" style="margin-bottom: 20px;">
+        <span class="title">QNX 8.0 COMPILER ERROR DIAGNOSTIC INTELLIGENCE</span>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">
+          Paste any compiler, linker, or preprocessor error message to obtain root-cause explanations and suggested code diffs:
+        </p>
+        <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 10px;">
+          <textarea id="diag-input" style="width: 100%; height: 80px; background: var(--code-bg); border: 1px solid var(--card-border); color: #fff; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 12px;">src/event_loop.c:9:24: fatal error: sys/epoll.h: No such file or directory</textarea>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-primary" onclick="triggerDiagnose()">Diagnose Error</button>
+            <button class="btn" onclick="setDiagSample('epoll')">Sample: epoll error</button>
+            <button class="btn" onclick="setDiagSample('timerfd')">Sample: timerfd error</button>
+            <button class="btn" onclick="setDiagSample('pthread')">Sample: -lpthread linker error</button>
+          </div>
+        </div>
+      </div>
+      <div id="diag-results"></div>
+    </div>
+
+    <!-- Tab 5: SDK Environment -->
+    <div id="tab-sdk" class="panel">
+      <div class="metric-card">
+        <span class="title">HOST QNX SDP 8.0 STATUS</span>
+        <div id="sdk-details" style="font-size: 13px; margin-top: 10px; line-height: 1.8;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentProject = 'legacy_linux_telematics';
+    let reportData = null;
+    let activeSevFilter = 'ALL';
+
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    function setSeverityFilter(sev, el) {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      activeSevFilter = sev;
+      filterFindings();
+    }
+
+    function onProjectChange(val) {
+      currentProject = val;
+      fetchReport();
+    }
+
+    async function fetchReport() {
+      try {
+        const res = await fetch(`/api/report?project=${currentProject}`);
+        reportData = await res.json();
+        renderDashboard(reportData);
+      } catch (e) {
+        console.error("Failed to load live API report, falling back to local dataset", e);
+      }
+    }
+
+    function renderDashboard(data) {
+      document.getElementById('proj-title').innerText = `QNX Sentinel — ${data.project_name}`;
+      document.getElementById('val-score').innerText = `${data.score}/100`;
+      document.getElementById('val-grade').innerText = `Compliance Grade: ${data.grade}`;
+      
+      const circle = document.getElementById('circle-grade');
+      circle.className = `score-circle grade-${data.grade}`;
+      circle.innerText = data.grade;
+
+      document.getElementById('val-critical').innerText = data.summary.CRITICAL || 0;
+      document.getElementById('val-warning').innerText = data.summary.WARNING || 0;
+      document.getElementById('pill-crit').innerText = data.summary.CRITICAL || 0;
+      document.getElementById('pill-warn').innerText = data.summary.WARNING || 0;
+      document.getElementById('count-all').innerText = data.findings.length;
+
+      const m = data.project_structure.metrics;
+      document.getElementById('val-files').innerText = `${m.total_files} files`;
+      document.getElementById('val-loc').innerText = `${m.lines_of_code.toLocaleString()} LOC`;
+
+      // Render SDK
+      const sdk = data.sdk_status;
+      let sdkHtml = `<div><strong>SDP Detected:</strong> ${sdk.is_qnx_sdp_detected ? 'YES (' + (sdk.sdp_version || '8.0') + ')' : 'NO (Running in Host-Static Analysis & Simulated Verification Mode)'}</div>`;
+      if (sdk.qnx_host) sdkHtml += `<div><strong>QNX_HOST:</strong> <code>${sdk.qnx_host}</code></div>`;
+      if (sdk.qnx_target) sdkHtml += `<div><strong>QNX_TARGET:</strong> <code>${sdk.qnx_target}</code></div>`;
+      if (sdk.qcc_path) sdkHtml += `<div><strong>Compiler:</strong> <code>${sdk.qcc_path}</code></div>`;
+      if (sdk.env_script_suggested) sdkHtml += `<div style="color: #d29922; margin-top: 6px;"><strong>To activate real SDP:</strong> <code>${sdk.env_script_suggested}</code></div>`;
+      document.getElementById('sdk-details').innerHTML = sdkHtml;
+
+      filterFindings();
+    }
+
+    function filterFindings() {
+      if (!reportData) return;
+      const term = (document.getElementById('search-box').value || '').toLowerCase();
+      const container = document.getElementById('findings-container');
+      container.innerHTML = '';
+
+      const filtered = reportData.findings.filter(f => {
+        if (activeSevFilter !== 'ALL' && f.severity !== activeSevFilter) return false;
+        if (term) {
+          const match = f.title.toLowerCase().includes(term) ||
+                        f.file_path.toLowerCase().includes(term) ||
+                        f.rule_id.toLowerCase().includes(term) ||
+                        f.description.toLowerCase().includes(term);
+          if (!match) return false;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--text-muted);"><h3 style="color: #39d353;">[+] Zero Compatibility Violations Found!</h3><p style="margin-top: 8px;">Codebase conforms cleanly to verified QNX SDP 8.0 POSIX and microkernel standards.</p></div>`;
+        return;
+      }
+
+      filtered.forEach((f, idx) => {
+        const card = document.createElement('div');
+        card.className = 'finding-card';
+        card.innerHTML = `
+          <div class="finding-header">
+            <div class="finding-title-group">
+              <span class="sev-tag sev-${f.severity}">${f.severity}</span>
+              <span class="finding-title">${f.title}</span>
+              <span style="font-size: 11px; color: var(--text-muted);">[${f.rule_id}]</span>
+            </div>
+            <span class="finding-loc">${f.file_path}:${f.line_number}</span>
+          </div>
+          <div class="finding-body">
+            <p class="desc-text">${f.description}</p>
+            ${f.code_snippet ? `<div class="code-box">${escapeHtml(f.code_snippet)}</div>` : ''}
+            <div class="remed-label">
+              <span>Remediation Guidance:</span>
+              ${f.documentation_url ? `<a class="doc-link" href="${f.documentation_url}" target="_blank">Official QNX Docs ↗</a>` : ''}
+            </div>
+            <p class="desc-text" style="color: #39d353;">${f.remediation}</p>
+            ${f.remediation_code ? `<div class="code-box remediation">${escapeHtml(f.remediation_code)}</div>` : ''}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function triggerBuild() {
+      const consoleBox = document.getElementById('build-console');
+      consoleBox.innerText = `Executing QNX 8.0 build / simulation workflow for ${currentProject}...`;
+      switchTab('tab-build', document.querySelectorAll('.tab')[1]);
+      try {
+        const res = await fetch(`/api/build?project=${currentProject}`, { method: 'POST' });
+        const data = await res.json();
+        consoleBox.innerText = `[Execution Mode: ${data.execution_mode}]\nProject: ${currentProject}\nDuration: ${data.duration_seconds}s | Exit Code: ${data.exit_code}\n\n${data.stdout}\n${data.stderr}`;
+      } catch (e) {
+        consoleBox.innerText = "Build invocation error: " + e;
+      }
+    }
+
+    async function triggerTests() {
+      const consoleBox = document.getElementById('test-console');
+      consoleBox.innerText = `Executing target tests for ${currentProject}...`;
+      switchTab('tab-test', document.querySelectorAll('.tab')[2]);
+      try {
+        const res = await fetch(`/api/test?project=${currentProject}`, { method: 'POST' });
+        const data = await res.json();
+        let out = `${data.raw_output}\nSuite: ${data.suite_name} (Mode: ${data.execution_mode})\nTotal: ${data.total_tests} | Passed: ${data.passed} | Failed: ${data.failed}\n\n`;
+        data.tests.forEach(t => {
+          out += `[${t.status}] ${t.name} (${t.duration_ms}ms)\n${t.stdout ? '  ' + t.stdout + '\n' : ''}${t.stderr ? '  ERR: ' + t.stderr + '\n' : ''}`;
+        });
+        consoleBox.innerText = out;
+      } catch (e) {
+        consoleBox.innerText = "Test execution error: " + e;
+      }
+    }
+
+    async function applyBuildConfigs() {
+      try {
+        const res = await fetch(`/api/apply-config?project=${currentProject}`, { method: 'POST' });
+        const data = await res.json();
+        alert("Applied: \n" + data.applied.join("\n"));
+        fetchReport();
+      } catch (e) {
+        alert("Failed to apply: " + e);
+      }
+    }
+
+    function setDiagSample(type) {
+      const ta = document.getElementById('diag-input');
+      if (type === 'epoll') {
+        ta.value = "src/event_loop.c:9:24: fatal error: sys/epoll.h: No such file or directory";
+      } else if (type === 'timerfd') {
+        ta.value = "src/event_loop.c:10:26: fatal error: sys/timerfd.h: No such file or directory";
+      } else if (type === 'pthread') {
+        ta.value = "nto-ld: cannot find -lpthread";
+      }
+      triggerDiagnose();
+    }
+
+    async function triggerDiagnose() {
+      const text = document.getElementById('diag-input').value;
+      const resDiv = document.getElementById('diag-results');
+      resDiv.innerHTML = '<div style="color: var(--text-muted); padding: 10px;">Diagnosing...</div>';
+      try {
+        const res = await fetch('/api/diagnose', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ log: text })
+        });
+        const data = await res.json();
+        resDiv.innerHTML = '';
+        if (!data.explanations || data.explanations.length === 0) {
+          resDiv.innerHTML = '<div style="color: var(--text-muted); padding: 10px;">No specific QNX SDP 8.0 pattern matched.</div>';
+          return;
+        }
+        data.explanations.forEach(exp => {
+          const card = document.createElement('div');
+          card.className = 'metric-card';
+          card.style.marginBottom = '16px';
+          card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span class="sev-tag sev-CRITICAL">${exp.category}</span>
+              <a class="doc-link" href="${exp.official_doc_link}" target="_blank">Official Documentation ↗</a>
+            </div>
+            <strong style="color: #f85149; font-size: 14px;">Error: ${escapeHtml(exp.error_signature)}</strong>
+            <p style="font-size: 13px; color: #c9d1d9; margin: 10px 0;">${exp.explanation}</p>
+            <strong style="font-size: 12px; color: #3fb950;">Actionable Remediation:</strong>
+            <ul style="font-size: 12px; color: var(--text-muted); margin-left: 20px; margin-top: 4px;">
+              ${exp.remediation_steps.map(s => `<li>${escapeHtml(s)}</li>`).join('')}
+            </ul>
+            ${exp.suggested_diff ? `
+              <strong style="font-size: 12px; color: var(--accent); margin-top: 10px;">Suggested Patch Diff:</strong>
+              <div class="code-box" style="margin-top: 6px;">${escapeHtml(exp.suggested_diff)}</div>
+            ` : ''}
+          `;
+          resDiv.appendChild(card);
+        });
+      } catch (e) {
+        resDiv.innerHTML = `<div style="color: #f85149;">Error communicating with diagnosis API: ${e}</div>`;
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    window.onload = fetchReport;
+  </script>
+</body>
+</html>

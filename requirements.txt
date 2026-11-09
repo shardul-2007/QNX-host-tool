@@ -1,0 +1,2 @@
+# QNX Sentinel - Vercel Serverless Dependencies
+# Zero mandatory external dependencies; pure standard library

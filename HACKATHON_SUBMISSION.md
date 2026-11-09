@@ -6,6 +6,8 @@
 - **Category:** Developer Tooling & Host Tools
 - **Target Host Environments:** Windows 10/11 (x64), Linux (Ubuntu/RHEL x64/AArch64), macOS (Intel/Apple Silicon)
 - **Target QNX Environment:** QNX Software Development Platform (SDP) 8.0 (Neutrino RTOS) targeting 64-bit ARM (`aarch64le`) and x86 (`x86_64`)
+- **Live Cloud Dashboard (Vercel):** [https://qnx-sentinel.vercel.app](https://qnx-sentinel.vercel.app)
+- **GitHub Repository:** [https://github.com/shardul-2007/QNX-host-tool](https://github.com/shardul-2007/QNX-host-tool)
 - **Repository Path:** `c:\Users\shard\Downloads\QNX host tool`
 
 ---

@@ -1,7 +1,9 @@
 # QNX Sentinel — Intelligent QNX 8.0 Build, Test & Compatibility Analyzer
 
 > **QNX Global Hackathon 2026** | **Category:** Developer Tooling & Host Tools  
-> **Target OS Support:** Host tools run on **Windows, Linux, macOS** targeting **QNX SDP 8.0 (AArch64 & x86_64)**.
+> **Target OS Support:** Host tools run on **Windows, Linux, macOS** targeting **QNX SDP 8.0 (AArch64 & x86_64)**.  
+> **Live Cloud Dashboard:** [https://qnx-sentinel.vercel.app](https://qnx-sentinel.vercel.app)  
+> **GitHub Repository:** [https://github.com/shardul-2007/QNX-host-tool](https://github.com/shardul-2007/QNX-host-tool)
 
 ---
 
